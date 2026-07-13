@@ -1,4 +1,5 @@
 import { scrapeArticle } from '../../server/scraper.mjs'
+import { fallbackArticleFor } from '../../server/fallback-data.mjs'
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -23,6 +24,16 @@ export default async function handler(req, res) {
     const article = await scrapeArticle(url)
     res.status(200).json(article)
   } catch (err) {
+    const fallback = fallbackArticleFor(String(req.query.url || ''))
+    if (fallback) {
+      return res.status(200).json({
+        ...fallback,
+        source: 'fallback',
+        warning: 'Failed to scrape live article',
+        message: err instanceof Error ? err.message : String(err),
+      })
+    }
+
     res.status(502).json({
       error: 'Failed to scrape article',
       message: err instanceof Error ? err.message : String(err),

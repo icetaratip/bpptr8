@@ -1,4 +1,5 @@
 import { scrapeNewsFeed, scrapeNewsList } from '../server/scraper.mjs'
+import { fallbackNews } from '../server/fallback-data.mjs'
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -28,8 +29,12 @@ export default async function handler(req, res) {
       items: data,
     })
   } catch (err) {
-    res.status(502).json({
-      error: 'Failed to scrape news',
+    res.status(200).json({
+      source: 'fallback',
+      fetchedAt: new Date().toISOString(),
+      count: fallbackNews.length,
+      items: fallbackNews.slice(0, Math.min(Number(req.query.limit) || 6, 12)),
+      warning: 'Failed to scrape live news',
       message: err instanceof Error ? err.message : String(err),
     })
   }
