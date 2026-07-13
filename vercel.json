@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/former-commanders",
+      "destination": "/"
+    },
+    {
+      "source": "/organization",
+      "destination": "/"
+    }
+  ]
+}
