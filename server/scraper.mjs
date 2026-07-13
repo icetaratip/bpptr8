@@ -10,6 +10,12 @@ function absUrl(src) {
   return `${BASE}${src.startsWith('/') ? '' : '/'}${src}`
 }
 
+function proxiedImageUrl(src) {
+  const url = absUrl(src)
+  if (!url.startsWith(`${BASE}/`)) return url
+  return `/api/image?url=${encodeURIComponent(url)}`
+}
+
 function cleanText(value) {
   return (value || '')
     .replace(/\u00a0/g, ' ')
@@ -110,7 +116,7 @@ function extractFormerCommanders($) {
     const lines = textLines($, td).filter((line) => !line.includes('รายละเอียด'))
     const index = commanders.length + 1
     commanders.push({
-      src: absUrl(src),
+      src: proxiedImageUrl(src),
       alt: cleanText(img.attr('alt') || img.attr('title') || lines[0] || `อดีตผู้บังคับบัญชา ลำดับที่ ${index}`),
       name: lines[0] || '',
       tenure: lines[1] || '',
@@ -127,7 +133,7 @@ function extractOrganization($) {
   const directorText = textLines($, rows.eq(1).find('td').eq(1))
   if (directorImage.length) {
     people.push({
-      src: absUrl(directorImage.attr('src')),
+      src: proxiedImageUrl(directorImage.attr('src')),
       alt: directorText[0] || 'ผู้บังคับบัญชา',
       name: directorText[0] || '',
       role: directorText[1] || '',
@@ -142,7 +148,7 @@ function extractOrganization($) {
     if (!img.length) return
     const lines = textLines($, deputyTextRow.eq(cellIndex))
     people.push({
-      src: absUrl(img.attr('src')),
+      src: proxiedImageUrl(img.attr('src')),
       alt: lines[0] || 'รองผู้บังคับบัญชา',
       name: lines[0] || '',
       role: lines[1] || '',
@@ -186,7 +192,7 @@ export async function scrapeNewsList(limit = 8) {
       title,
       date: dateMatch ? dateMatch[1] : '',
       url: absUrl(href),
-      thumb: absUrl(thumb),
+      thumb: proxiedImageUrl(thumb),
       excerpt,
     })
   })
@@ -241,7 +247,7 @@ export async function scrapeArticle(articleUrl) {
     ) {
       return
     }
-    const full = absUrl(src)
+    const full = proxiedImageUrl(src)
     if (!images.includes(full)) images.push(full)
   })
 
